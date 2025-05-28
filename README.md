@@ -1,8 +1,8 @@
 # AI-powered GitHub Repository Analyzer
 
 [![Stars](https://img.shields.io/github/stars/your-org/your-repo?style=social)](#)
-[![Build](https://img.shields.io/github/actions/workflow/status/your-org/your-repo/ci.yml)](#)
-[![License](https://img.shields.io/github/license/your-org/your-repo)](#)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)]
+[![Version](https://img.shields.io/badge/version-1.0.0-success)]  
 
 ## Description
 An interactive tool to analyze GitHub profiles and repositories using FastAPI, React, and OpenAI.  

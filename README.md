@@ -8,9 +8,6 @@
 An interactive tool to analyze GitHub profiles and repositories using FastAPI, React, and OpenAI.  
 Generates language breakdowns, star/fork trends, activity heatmaps, README quality scores, keyword suggestions, and a simple AI chat interface.
 
-## Demo
-![Demo Screenshot](docs/demo.png)
-
 ## Features
 - **Profile Overview**: Avatar, bio, followers, public repos, pinned repos  
 - **Language Breakdown**: Pie/bar charts with usage percentages  

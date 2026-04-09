@@ -3,6 +3,6 @@ uvicorn[standard]
 httpx
 python-dotenv
 pydantic
-openai
-aioredis
+pydantic-settings
+openai>=1.0.0
 textstat

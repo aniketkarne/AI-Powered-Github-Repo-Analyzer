@@ -1,0 +1,188 @@
+openapi: 3.0.1
+info:
+  title: GitHub Repo Analyzer API
+  description: |
+    Analyze any GitHub user's public profile — get their repository list, language breakdown,
+    star/fork trends, activity heatmap, and AI-powered README quality reports.
+    Perfect for due diligence on developers, open-source projects, or recruitment research.
+  version: 1.0.0
+
+servers:
+  - url: https://github-repo-analyzer.onrender.com
+    description: Production server (Render.com)
+  - url: http://localhost:8000
+    description: Local development
+
+paths:
+  /api/profile/{username}:
+    get:
+      operationId: getProfile
+      summary: Get GitHub user profile with repo stats
+      description: |
+        Fetches a GitHub user's profile with their avatar, bio, follower stats,
+        full repository list, language breakdown across all repos, top starred repos,
+        top forked repos, and activity heatmap (last push timestamps).
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+          description: GitHub username (e.g. "aniketkarne")
+      responses:
+        "200":
+          description: Profile data with repo statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileResponse"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/profile/{username}/readme-report:
+    get:
+      operationId: getReadmeReport
+      summary: Analyze README quality for all repos
+      description: |
+        Uses AI to analyze README files across all public repositories of a user.
+        Returns a summary, improvement suggestions, readability score (Flesch-Kincaid grade),
+        and lists missing sections (Installation, Usage, License, Contributing) per repo.
+        Note: This endpoint loops all repos and may take 10-30 seconds for users with many repos.
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: README analysis report per repository
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReadmeReportResponse"
+        "404":
+          description: User not found
+
+  /api/profile/{username}/repos:
+    get:
+      operationId: getRepos
+      summary: List all repos for a user
+      description: Returns lightweight repo list (name, description, stars, forks, language) for a GitHub user.
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of repositories
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReposResponse"
+
+  /health:
+    get:
+      operationId: healthCheck
+      summary: API health check
+      responses:
+        "200":
+          description: Service is healthy
+
+components:
+  schemas:
+    ProfileResponse:
+      type: object
+      properties:
+        profile:
+          type: object
+          properties:
+            login: { type: string }
+            name: { type: string }
+            avatar_url: { type: string }
+            bio: { type: string }
+            followers: { type: integer }
+            following: { type: integer }
+            public_repos: { type: integer }
+            html_url: { type: string }
+        repos:
+          type: array
+          items:
+            type: object
+            properties:
+              name: { type: string }
+              description: { type: string }
+              stars: { type: integer }
+              forks: { type: integer }
+              language: { type: string }
+              pushed_at: { type: string }
+        language_breakdown:
+          type: array
+          items:
+            type: object
+            properties:
+              language: { type: string }
+              count: { type: integer }
+              percent: { type: number }
+        star_trend:
+          type: array
+          items:
+            type: object
+            properties:
+              repo: { type: string }
+              stars: { type: integer }
+        fork_trend:
+          type: array
+          items:
+            type: object
+            properties:
+              repo: { type: string }
+              forks: { type: integer }
+        heatmap:
+          type: array
+          items:
+            type: string
+          description: Array of push timestamps
+
+    ReadmeReportResponse:
+      type: object
+      properties:
+        reports:
+          type: array
+          items:
+            type: object
+            properties:
+              repo: { type: string }
+              analysis:
+                type: object
+                properties:
+                  summary: { type: string }
+                  suggestions: { type: array, items: { type: string } }
+                  readability_score: { type: number }
+                  missing_sections: { type: array, items: { type: string } }
+
+    ReposResponse:
+      type: object
+      properties:
+        repos:
+          type: array
+          items:
+            type: object
+            properties:
+              name: { type: string }
+              description: { type: string }
+              stars: { type: integer }
+              forks: { type: integer }
+              language: { type: string }
+              pushed_at: { type: string }
+
+    Error:
+      type: object
+      properties:
+        detail: { type: string }

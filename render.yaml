@@ -1,0 +1,17 @@
+# Render.com Blueprint
+# Deploy: render blue print create render.yaml
+
+services:
+  - type: web
+    name: github-repo-analyzer
+    runtime: docker
+    region: oregon
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    envVars:
+      - key: GITHUB_TOKEN
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: PORT
+        value: 8000

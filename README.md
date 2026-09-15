@@ -1,8 +1,8 @@
 # AI-powered GitHub Repository Analyzer
 
-[![Stars](https://img.shields.io/github/stars/your-org/your-repo?style=social)](#)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)]
-[![Version](https://img.shields.io/badge/version-1.0.0-success)]  
+[![Stars](https://img.shields.io/github/stars/aniketkarne/AI-Powered-Github-Repo-Analyzer?style=social)](#)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Tests](https://img.shields.io/badge/tests-pytest-blue)]()
 
 ## Description
 An interactive tool to analyze GitHub profiles and repositories using FastAPI, React, and OpenAI.  
@@ -23,23 +23,23 @@ flowchart LR
   User[React UI] -->|GET /api/profile/:user| BE[FastAPI]
   BE -->|GitHub API| GH[GitHub]
   BE -->|LLM calls| AI[OpenAI]
-  BE -->|Cache| Cache[(Redis/In-Memory)]
+  BE -->|Cache| Cache[(In-Memory)]
   BE -->|JSON| FE[React Charts]
 ```
 
 ## Tech Stack
-- **Backend**: Python, FastAPI, HTTPX, aioredis  
-- **AI**: OpenAI GPT-3.5-turbo  
-- **Frontend**: React, Axios, Chart.js, React-Chartjs-2  
-- **Styling**: Tailwind CSS (optional)  
-- **Testing**: pytest, React Testing Library  
-- **Deployment**: Docker, Vercel/Heroku
+- **Backend**: Python 3.11, FastAPI, HTTPX, OpenAI Python SDK v1.x  
+- **AI**: OpenAI `gpt-4o-mini` (chat completions)  
+- **Cache**: In-process `asyncio.Lock`-guarded dict with 10-minute TTL  
+- **Frontend**: React 18, Axios, Chart.js, react-chartjs-2  
+- **Testing**: pytest (backend)  
+- **Deployment**: Docker, Render
 
 ## Installation
 
 ```bash
-git clone https://github.com/your-org/your-repo.git
-cd your-repo
+git clone https://github.com/aniketkarne/AI-Powered-Github-Repo-Analyzer.git
+cd AI-Powered-Github-Repo-Analyzer
 ```
 
 ### Backend
@@ -49,6 +49,7 @@ cd backend
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
+cp .env.example .env   # then fill in your tokens
 uvicorn app.main:app --reload
 ```
 
@@ -65,10 +66,11 @@ npm start
 Create a `.env` file in `backend/`:
 
 ```env
-GITHUB_TOKEN=your_github_personal_access_token
-OPENAI_API_KEY=your_openai_api_key
-REDIS_URL=redis://localhost:6379/0
+GITHUB_TOKEN=ghp_your_token_here
+OPENAI_API_KEY=sk-your_openai_key_here
 ```
+
+The backend will start without either token — endpoints that need them will return a clear `401`/`404` instead of crashing at boot.
 
 ## API Endpoints
 
@@ -80,14 +82,21 @@ REDIS_URL=redis://localhost:6379/0
 - `GET /api/profile/{username}/readme-report`  
   Response: `{ reports: [ { repo, analysis } ] }`
 
-### Keywords
-- `GET /api/profile/{username}/keywords`  
-  Response: `{ repo, keywords: [ ... ] }`
+### Repos only
+- `GET /api/profile/{username}/repos`  
+  Response: `{ repos: [ ... ] }`
 
-### Chat
-- `POST /api/chat`  
-  Body: `{ "question": "your question here" }`  
-  Response: `{ "answer": "AI response" }`
+### Health
+- `GET /health`  
+  Response: `{ "status": "ok" }`
+
+## Running Tests
+
+```bash
+cd backend
+pip install pytest pytest-asyncio
+pytest
+```
 
 ## Contributing
 1. Fork the repository  
@@ -99,4 +108,4 @@ REDIS_URL=redis://localhost:6379/0
 Please follow code style guidelines and add tests for new features.
 
 ## License
-This project is licensed under the MIT License.
+This project is licensed under the MIT License — see [LICENSE](LICENSE).

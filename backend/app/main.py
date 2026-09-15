@@ -38,7 +38,11 @@ origins = ["*"]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_credentials=True,
+    # NOTE: allow_credentials is intentionally False. Browsers refuse
+    # credentialed requests when allow_origins is "*", so the previous
+    # setting was silently dropping Authorization/Cookie headers. Flip
+    # this to True (and scope allow_origins) only if you add auth.
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )

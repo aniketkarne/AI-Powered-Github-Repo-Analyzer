@@ -1,11 +1,16 @@
 import json
 import re
 import textstat
-from openai import OpenAI
+from openai import AsyncOpenAI
 from .config import settings
 from .prompts import README_ANALYSIS_PROMPT
 
-_client = OpenAI(api_key=settings.openai_api_key)
+
+def _client() -> AsyncOpenAI:
+    # Lazy: server can start without OPENAI_API_KEY; only callers that hit
+    # analyze_readme need a key, and the SDK raises AuthenticationError on
+    # the actual request, not at import.
+    return AsyncOpenAI(api_key=settings.openai_api_key)
 
 
 async def analyze_readme(content: str) -> dict:
@@ -17,7 +22,7 @@ async def analyze_readme(content: str) -> dict:
         {"role": "system", "content": README_ANALYSIS_PROMPT},
         {"role": "user", "content": content}
     ]
-    response = _client.chat.completions.create(
+    response = await _client().chat.completions.create(
         model="gpt-4o-mini",
         messages=messages,
         temperature=0.2

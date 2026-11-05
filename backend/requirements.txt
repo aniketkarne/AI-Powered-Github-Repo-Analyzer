@@ -1,8 +1,8 @@
-fastapi
-uvicorn[standard]
-httpx
-python-dotenv
-pydantic
-pydantic-settings
+fastapi>=0.110
+uvicorn[standard]>=0.27
+httpx>=0.26
+python-dotenv>=1.0
+pydantic>=2.6
+pydantic-settings>=2.2
 openai>=1.0.0
-textstat
+textstat>=0.7.3

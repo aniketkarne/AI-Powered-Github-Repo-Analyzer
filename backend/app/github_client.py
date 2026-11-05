@@ -42,10 +42,12 @@ async def get_repos(username: str, token: str) -> list:
     ]
 
 async def get_readme(username: str, repo_name: str, token: str) -> str:
-    headers = {
-        "Authorization": f"token {token}",
-        "Accept": "application/vnd.github.v3.raw"
-    }
+    # Same guard as get_user_profile/get_repos: an empty Authorization header
+    # is a bad credential — GitHub 401s it even for public repos, which used to
+    # kill every README fetch on token-less deployments.
+    headers = {"Accept": "application/vnd.github.v3.raw"}
+    if token:
+        headers["Authorization"] = f"token {token}"
     async with httpx.AsyncClient() as client:
         resp = await client.get(
             f"{GITHUB_API}/repos/{username}/{repo_name}/readme",

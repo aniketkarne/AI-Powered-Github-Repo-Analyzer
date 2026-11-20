@@ -29,18 +29,45 @@ function App() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [report, setReport] = useState(null);
+  const [reportLoading, setReportLoading] = useState(false);
+  const [reportError, setReportError] = useState(null);
 
   const analyze = async () => {
-    if (!username.trim()) return;
+    const name = username.trim();
+    if (!name || loading) return;
     setLoading(true);
     setError(null);
+    setData(null);
+    setReport(null);
+    setReportError(null);
     try {
-      const res = await axios.get(`${API_BASE}/api/profile/${username.trim()}`);
+      const res = await axios.get(
+        `${API_BASE}/api/profile/${encodeURIComponent(name)}`
+      );
       setData(res.data);
     } catch (err) {
       setError(err.response?.data?.detail || "Failed to fetch profile");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const analyzeReadme = async () => {
+    const name = username.trim();
+    if (!name || reportLoading) return;
+    setReportLoading(true);
+    setReportError(null);
+    setReport(null);
+    try {
+      const res = await axios.get(
+        `${API_BASE}/api/profile/${encodeURIComponent(name)}/readme-report`
+      );
+      setReport(Array.isArray(res.data.reports) ? res.data.reports : []);
+    } catch (err) {
+      setReportError(err.response?.data?.detail || "Failed to analyze READMEs");
+    } finally {
+      setReportLoading(false);
     }
   };
 
@@ -89,6 +116,13 @@ function App() {
           style={{ padding: "10px 24px", fontSize: 16, borderRadius: 8, border: "none", background: "#58a6ff", color: "#fff", cursor: loading ? "not-allowed" : "pointer" }}
         >
           {loading ? "Loading..." : "Analyze"}
+        </button>
+        <button
+          onClick={analyzeReadme}
+          disabled={reportLoading || !username.trim()}
+          style={{ padding: "10px 24px", fontSize: 16, borderRadius: 8, border: "1px solid #58a6ff", background: "#fff", color: "#58a6ff", cursor: reportLoading ? "not-allowed" : "pointer" }}
+        >
+          {reportLoading ? "Analyzing..." : "README Report"}
         </button>
       </div>
 
@@ -148,6 +182,53 @@ function App() {
             ))}
           </div>
         </>
+      )}
+
+      {reportError && (
+        <div style={{ color: "red", textAlign: "center", margin: "1rem 0" }}>{reportError}</div>
+      )}
+
+      {report !== null && (
+        <div style={{ marginTop: "2rem" }}>
+          <h3>README Quality ({report.length})</h3>
+          {report.length === 0 && (
+            <p style={{ color: "#999" }}>No READMEs found to analyze.</p>
+          )}
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {report.map((item) => {
+              const analysis = item.analysis || {};
+              const suggestions = Array.isArray(analysis.suggestions) ? analysis.suggestions : [];
+              const missing = Array.isArray(analysis.missing_sections) ? analysis.missing_sections : [];
+              return (
+                <div key={item.repo} style={{ padding: "12px 16px", border: "1px solid #eee", borderRadius: 8 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                    <strong>{item.repo}</strong>
+                    {typeof analysis.readability_score === "number" && (
+                      <span style={{ color: "#666", fontSize: 13 }}>
+                        Flesch–Kincaid grade {analysis.readability_score.toFixed(1)}
+                      </span>
+                    )}
+                  </div>
+                  {analysis.summary && (
+                    <p style={{ margin: "6px 0", fontSize: 14 }}>{analysis.summary}</p>
+                  )}
+                  {suggestions.length > 0 && (
+                    <ul style={{ margin: "6px 0", paddingLeft: 20, fontSize: 14 }}>
+                      {suggestions.map((s, i) => (
+                        <li key={i}>{s}</li>
+                      ))}
+                    </ul>
+                  )}
+                  {missing.length > 0 && (
+                    <p style={{ margin: "6px 0 0", fontSize: 13, color: "#b26a00" }}>
+                      Missing sections: {missing.join(", ")}
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
       )}
     </div>
   );

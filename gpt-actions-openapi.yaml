@@ -52,6 +52,7 @@ paths:
         Returns a summary, improvement suggestions, readability score (Flesch-Kincaid grade),
         and lists missing sections (Installation, Usage, License, Contributing) per repo.
         Note: This endpoint loops all repos and may take 10-30 seconds for users with many repos.
+        Repositories without a README are skipped and do not appear in the report.
       parameters:
         - name: username
           in: path
@@ -86,6 +87,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ReposResponse"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 
   /health:
     get:

@@ -1,10 +1,9 @@
-from typing import Any, Dict
-
 README_ANALYSIS_PROMPT = """
 You are a professional GitHub reviewer. Given the content of a repository's README, provide:
 1. A concise summary.
 2. Suggestions to improve documentation including missing sections, clarity, examples, etc.
-Respond as JSON with keys "summary" and "suggestions".
+Respond with one raw JSON object and nothing else: no markdown code fences, no prose outside the JSON.
+Use exactly the keys "summary" (a string) and "suggestions" (a list of strings).
 """
 
 KEYWORD_EXTRACTION_PROMPT = """
